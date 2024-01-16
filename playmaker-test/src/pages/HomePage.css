@@ -1,0 +1,56 @@
+
+.home-page {
+    padding-top: 50%;
+    padding-bottom: 50px;
+    color: black; /* Texte blanc pour une meilleure lisibilité sur le fond foncé */
+  }
+  
+  .home-page h1 {
+    font-size: 3rem; /* Une taille de police plus grande pour le titre */
+    font-weight: bold; /* Gras pour attirer l'attention */
+  }
+  
+  .home-page p {
+    font-size: 1.2rem; /* Une taille de police légèrement plus grande pour le texte */
+    margin-top: 20px; /* Espacement pour la séparation des paragraphes */
+  }
+  
+  .home-page hr {
+    border-top: 1px solid black; /* Ligne séparatrice blanche pour un contraste */
+    width: 60%; /* Longueur de la ligne séparatrice */
+    margin: 2rem auto; /* Centrage et espacement de la ligne séparatrice */
+  }
+  
+  .home-page .btn {
+    padding: 10px 20px; /* Padding plus généreux pour un bouton plus grand et plus cliquable */
+    font-size: 1.2rem; /* Texte du bouton plus grand pour l'importance */
+  }
+
+.home-page {
+    padding-top: 50px;
+    padding-bottom: 50px;
+    color: black; /* Texte blanc pour une meilleure lisibilité sur le fond foncé */
+  }
+  
+  .home-page h1 {
+    font-size: 3rem; /* Une taille de police plus grande pour le titre */
+    font-weight: bold; /* Gras pour attirer l'attention */
+  }
+  
+  .home-page p {
+    font-size: 1.2rem; /* Une taille de police légèrement plus grande pour le texte */
+    margin-top: 20px; /* Espacement pour la séparation des paragraphes */
+  }
+  
+  .home-page hr {
+    border-top: 1px solid black; /* Ligne séparatrice blanche pour un contraste */
+    width: 60%; /* Longueur de la ligne séparatrice */
+    margin: 2rem auto; /* Centrage et espacement de la ligne séparatrice */
+  }
+  
+  .home-page .btn {
+    padding: 10px 20px; /* Padding plus généreux pour un bouton plus grand et plus cliquable */
+    font-size: 1.2rem; /* Texte du bouton plus grand pour l'importance */
+  }
+
+  

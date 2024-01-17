@@ -24,7 +24,6 @@ def analyse_image(image_path):
 
 if __name__ == "__main__":
     if len(sys.argv) >= 1:
-        
         image_path = sys.argv[1]  # Obtenir le chemin de l'image de l'argument
         analyse_image(image_path)
     else:

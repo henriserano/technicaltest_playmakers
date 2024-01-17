@@ -58,13 +58,13 @@ async function verifyBadge(imagePath) {
     const invalidationReasons = [];
     let happyColorCount = 0;
     
-    console.log(imagePath);
     const typee = await getImageFormat(imagePath);
-    console.log(typee); 
+    if (typee !== 'png') {
+        invalidationReasons.push("Non png image");
+    }
 
     const localImagePath = 'image.'+typee; // Chemin où l'image sera sauvegardée
     await saveImageLocally(imagePath, localImagePath);
-    console.log(localImagePath);
     const pythonResult = await runPythonScript(localImagePath);
     console.log(`Sortie Python: ${pythonResult}`);
     const isHappyFace = JSON.parse(pythonResult);
@@ -111,15 +111,13 @@ async function verifyBadge(imagePath) {
     
     
     const happyColorPercentage = (happyColorCount / (size * size)) * 100;
-    console.log(size * size);
     console.log("happyColorPercentage:", happyColorPercentage  );
     console.log("happyColorCount:", happyColorCount  );
     if (happyColorPercentage < 5) { // Exemple de seuil de pourcentage
         invalidationReasons.push("Insufficient happy colors percentage");
     }
     fs.unlinkSync(localImagePath);
-    console.log(invalidationReasons);
-    console.log(invalidationReasons.length == 0);
+
     return {
         isVerified: invalidationReasons.length == 0,
         reasons: invalidationReasons

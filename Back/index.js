@@ -17,7 +17,6 @@ app.use(fileUpload());
 
 // Use badge routes
 app.use('/api/upload', async (req, res) => {
-    console.log("Received request on /api/upload");
 
     if (!req.files) {
         console.error("No files in the request");
@@ -26,7 +25,6 @@ app.use('/api/upload', async (req, res) => {
 
     try {
         const badge = req.files.file;
-        console.log("File received:", badge.name);
         // Verify the badge
         const isVerified = await verifyBadge(badge.data);
         if (!isVerified.isVerified) {

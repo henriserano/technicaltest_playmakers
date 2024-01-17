@@ -116,7 +116,7 @@ async function verifyBadge(imagePath) {
     if (happyColorPercentage < 5) { // Exemple de seuil de pourcentage
         invalidationReasons.push("Insufficient happy colors percentage");
     }
-    //fs.unlinkSync(localImagePath);
+    fs.unlinkSync(localImagePath);
     return {
         isVerified: invalidationReasons.length === 0,
         reasons: invalidationReasons

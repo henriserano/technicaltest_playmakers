@@ -95,6 +95,7 @@ async function verifyBadge(imagePath) {
             if (isInHappyColorRange(r, g, b)) {
                 happyColorCount++;
             }
+            /*
             const alpha = data[offset + 3];
             if (alpha > 0) {
                 const dx = centerX - x;
@@ -104,7 +105,7 @@ async function verifyBadge(imagePath) {
                 }
 
                 
-            }
+            }*/
         }
     }
     
@@ -117,8 +118,10 @@ async function verifyBadge(imagePath) {
         invalidationReasons.push("Insufficient happy colors percentage");
     }
     fs.unlinkSync(localImagePath);
+    console.log(invalidationReasons);
+    console.log(invalidationReasons.length == 0);
     return {
-        isVerified: invalidationReasons.length === 0,
+        isVerified: invalidationReasons.length == 0,
         reasons: invalidationReasons
     };
 }

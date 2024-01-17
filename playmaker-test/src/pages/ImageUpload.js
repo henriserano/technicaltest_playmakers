@@ -49,7 +49,9 @@ const CourseUploadPage = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                if (data.isVerified) {
+                console.log(data);
+                console.log(data.message);
+                if (data.message === 'Badge verified and converted successfully') {
                     alert('Image téléchargée avec succès!');
                 } else {
                     alert('L\'image a été refusée pour les raisons suivantes: ' + [...new Set(data.reasons)].join(', '));

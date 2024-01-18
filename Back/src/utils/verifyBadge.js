@@ -9,6 +9,13 @@ function isInHappyColorRange(r, g, b) {
            (r > 200 && g < 180 && b > 180);   // Pink range
 }
 
+// Function to check if a pixel is within a circle
+function isWithinCircle(x, y, centerX, centerY, radius) {
+    const dx = x - centerX;
+    const dy = y - centerY;
+    return (dx * dx + dy * dy) <= (radius * radius);
+}
+
 // Save the image locally using the sharp library
 async function saveImageLocally(imagePath, outputFilePath) {
     const image = sharp(imagePath);
@@ -74,6 +81,10 @@ async function verifyBadge(imagePath) {
         invalidationReasons.push("Image size is not 512x512 pixels");
     }
 
+    const radius = imageSize / 2;
+    const centerX = radius;
+    const centerY = radius;
+
     // Process image data
     const data = await image.raw().toBuffer();
     for (let y = 0; y < imageSize; y++) {
@@ -82,7 +93,13 @@ async function verifyBadge(imagePath) {
             const r = data[offset];
             const g = data[offset + 1];
             const b = data[offset + 2];
-
+            const alpha = data[offset + 3];
+            
+            // Check for nontransparent pixels outside the circle
+            if (alpha > 0 && !isWithinCircle(x, y, centerX, centerY, radius)) {
+                invalidationReasons.push("Nontransparent pixel outside the circular region");
+            }
+            
             if (isInHappyColorRange(r, g, b)) {
                 happyColorCount++;
             }

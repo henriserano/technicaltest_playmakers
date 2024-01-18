@@ -1,66 +1,62 @@
+// Import required modules
 const express = require('express');
 const fileUpload = require('express-fileupload');
 const verifyBadge = require('./src/utils/verifyBadge');
-const convertToBadge = require('./src/utils/convertToBadge');
 const cors = require('cors');
+
 const app = express();
-
-
 const port = 3000;
-app.use(cors({
-    origin: '*' // Allow requests from any domain
-}));
+
+// Enable all CORS requests
+app.use(cors({ origin: '*' }));
+
 // Middleware for handling file uploads
 app.use(fileUpload());
 
-
-
-// Use badge routes
-app.use('/api/upload', async (req, res) => {
-
-    if (!req.files) {
-        console.error("No files in the request");
+// Route for uploading and verifying badges
+app.post('/api/upload', async (req, res) => {
+    if (!req.files || !req.files.file) {
+        console.error("No file found in the request");
         return res.status(400).send('No file uploaded');
     }
 
     try {
         const badge = req.files.file;
-        // Verify the badge
-        const isVerified = await verifyBadge(badge.data);
-        if (!isVerified.isVerified) {
-            return res.json({ message: 'Invalid badge', reasons: isVerified.reasons });
+        const verificationResult = await verifyBadge(badge.data);
+
+        if (!verificationResult.isVerified) {
+            return res.status(400).json({ 
+                message: 'Invalid badge', 
+                reasons: verificationResult.reasons 
+            });
         }
 
-        res.json({ message: 'Badge verified and converted successfully' });
-    } 
-        catch (err) {
-            console.error("Error in /api/upload:", err);
-            res.status(500).send(err.message);
-        }
-    
+        res.json({ message: 'Badge verified successfully' });
+    } catch (err) {
+        console.error("Error in /api/upload:", err);
+        res.status(500).send('Server error occurred');
+    }
 });
 
 // Default route
 app.get('/', (req, res) => {
-    res.send('Welcome on badge API');
+    res.send('Welcome to the Badge Verification API');
 });
 
-// Error handling
-app.use((req, res, next) => {
-    res.status(404).send("Page doesn't exist !");
+// 404 Error handling
+app.use((req, res) => {
+    res.status(404).send("Page not found");
 });
 
-
+// General error handling
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).send('Something goes wrong!');
+    res.status(500).send('Internal server error');
 });
-
-
 
 // Start server
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+    console.log(`Server running on port ${port}`);
 });
 
 module.exports = app;

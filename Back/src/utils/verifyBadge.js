@@ -1,28 +1,30 @@
+// Import necessary modules
 const sharp = require('sharp');
 const { spawn } = require('child_process');
 const fs = require('fs');
-const path = require('path');
 
+// Check if the RGB values fall within the happy color range
 function isInHappyColorRange(r, g, b) {
-    // Exemple de gamme de couleurs heureuses (à ajuster selon vos besoins)
-    return (r > 200 && g > 150 && b < 100) || // Gamme de jaune/orange
-           (r > 200 && g < 180 && b > 180); // Gamme de rose
+    return (r > 200 && g > 150 && b < 100) || // Yellow/Orange range
+           (r > 200 && g < 180 && b > 180);   // Pink range
 }
 
+// Save the image locally using the sharp library
 async function saveImageLocally(imagePath, outputFilePath) {
     const image = sharp(imagePath);
     await image.toFile(outputFilePath);
 }
 
+// Retrieve the image format (e.g., 'jpeg', 'png')
 async function getImageFormat(imagePath) {
     const image = sharp(imagePath);
     const metadata = await image.metadata();
-    return metadata.format;  // 'jpeg', 'png', etc.
+    return metadata.format;
 }
 
+// Run the Python script and process its output
 function runPythonScript(imageFilePath) {
     return new Promise((resolve, reject) => {
-        // Remarquez comment les arguments sont passés ici
         const pythonProcess = spawn('python', ['src/utils/faceanalyse.py', imageFilePath]);
 
         let pythonData = "";
@@ -31,12 +33,12 @@ function runPythonScript(imageFilePath) {
         });
 
         pythonProcess.stderr.on('data', (data) => {
-            console.error(`Erreur Python: ${data}`);
+            console.error(`Python Error: ${data}`);
         });
 
         pythonProcess.on('close', (code) => {
             if (code !== 0) {
-                reject(new Error(`Processus Python terminé avec le code ${code}`));
+                reject(new Error(`Python process exited with code ${code}`));
             } else {
                 resolve(pythonData);
             }
@@ -44,50 +46,39 @@ function runPythonScript(imageFilePath) {
     });
 }
 
-
-
+// Main function to verify the badge
 async function verifyBadge(imagePath) {
-    const size = 512;
-    const radius = size / 2;
-    const centerX = radius;
-    const centerY = radius;
-
+    const imageSize = 512;
     const image = sharp(imagePath);
     const metadata = await image.metadata();
-
     const invalidationReasons = [];
     let happyColorCount = 0;
     
-    const typee = await getImageFormat(imagePath);
-    if (typee !== 'png') {
-        invalidationReasons.push("Non png image");
+    const imageFormat = await getImageFormat(imagePath);
+    if (imageFormat !== 'png') {
+        invalidationReasons.push("Image is not in PNG format");
     }
 
-    const localImagePath = 'image.'+typee; // Chemin où l'image sera sauvegardée
+    const localImagePath = `image.${imageFormat}`;
     await saveImageLocally(imagePath, localImagePath);
     const pythonResult = await runPythonScript(localImagePath);
-    console.log(`Sortie Python: ${pythonResult}`);
+    console.log(`Python Output: ${pythonResult}`);
     const isHappyFace = JSON.parse(pythonResult);
 
     if (!isHappyFace) {
-        invalidationReasons.push("Non happy face");
+        invalidationReasons.push("Image does not contain a happy face");
     }
 
-
-    
-    
-
-    // Check image size
-    if (metadata.width !== size || metadata.height !== size) {
-        invalidationReasons.push("Size is not 512x512");
+    // Validate image size
+    if (metadata.width !== imageSize || metadata.height !== imageSize) {
+        invalidationReasons.push("Image size is not 512x512 pixels");
     }
 
-    // Extract image data
+    // Process image data
     const data = await image.raw().toBuffer();
-
-    for (let y = 0; y < size; y++) {
-        for (let x = 0; x < size; x++) {
-            const offset = (size * y + x) * 4; // 4 channels (RGBA)
+    for (let y = 0; y < imageSize; y++) {
+        for (let x = 0; x < imageSize; x++) {
+            const offset = (imageSize * y + x) * 4; // RGBA channels
             const r = data[offset];
             const g = data[offset + 1];
             const b = data[offset + 2];
@@ -95,31 +86,20 @@ async function verifyBadge(imagePath) {
             if (isInHappyColorRange(r, g, b)) {
                 happyColorCount++;
             }
-            /*
-            const alpha = data[offset + 3];
-            if (alpha > 0) {
-                const dx = centerX - x;
-                const dy = centerY - y;
-                if (dx * dx + dy * dy > radius * radius) {
-                    invalidationReasons.push("Pixel is outside the circular region");
-                }
-
-                
-            }*/
         }
     }
     
-    
-    const happyColorPercentage = (happyColorCount / (size * size)) * 100;
-    console.log("happyColorPercentage:", happyColorPercentage  );
-    console.log("happyColorCount:", happyColorCount  );
-    if (happyColorPercentage < 5) { // Exemple de seuil de pourcentage
-        invalidationReasons.push("Insufficient happy colors percentage");
+    const happyColorPercentage = (happyColorCount / (imageSize * imageSize)) * 100;
+    console.log("Happy Color Percentage:", happyColorPercentage);
+    if (happyColorPercentage < 5) {
+        invalidationReasons.push("Insufficient happy color percentage");
     }
+
+    // Clean up local image
     fs.unlinkSync(localImagePath);
 
     return {
-        isVerified: invalidationReasons.length == 0,
+        isVerified: invalidationReasons.length === 0,
         reasons: invalidationReasons
     };
 }
